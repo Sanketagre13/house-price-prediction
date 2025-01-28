@@ -7,7 +7,7 @@ app=Flask(__name__)
 data=pd.read_csv("data.csv")
 data1=pd.read_csv("house_data.csv")
 fdata=pd.read_csv("final_data.csv")
-pipe=pickle.load(open("model2.pkl",'rb'))
+pipe=pickle.load(open("model1.pkl",'rb'))
 
 @app.route("/")
 def index():
@@ -26,7 +26,7 @@ def prediction():
     city=request.form.get("city")
     bhk=request.form.get("bhk")
     #print(location1,bhk,city)
-    inputs=pd.DataFrame([[location1,bhk,city]],columns=['Location','No. of Bedrooms','City'])
+    inputs=pd.DataFrame([[location1,bhk,city]],columns=['Location','No. of Bedrooms','city'])
     pred= pipe.predict(inputs)[0]
     pred=np.round(pred,2)
     print(pred)
