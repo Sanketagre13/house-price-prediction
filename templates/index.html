@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-image: url("{{ url_for('static',filename='images/city.jpg') }}");
+            object-fit: cover;
+            background-repeat: no-repeat;
+            width: 100vw;
+            height: 100vh;
+            background-size: cover;
+            font-style: oblique;
+        }
+        
+        .trans {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            mix-blend-mode: lighten;
+        }
+        
+        #text {
+            color: white;
+            text-align: center;
+            margin: 10px 0;
+            font-size: 6vw;
+            font-family: Verdana, Tahoma, sans-serif;
+            opacity: 0.5;
+            text-shadow: 1px 1px 5px orange;
+        }
+        
+        .card {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            background-color: black;
+            opacity: 0.4;
+            border-radius: 10px;
+            display: inline-block;
+        }
+        
+        .back {
+            width: 80vw;
+            height: 70vh;
+            position: absolute;
+            left: 12%;
+            top: 20%;
+            border: 1.4px solid white;
+            border-radius: 10px;
+            box-shadow: 1px 1px 10px white;
+        }
+        
+        .input_container {
+            width: 90%;
+            height: 30px;
+            margin: 20px 3vw;
+            border: 3px solid blue;
+            background-color: transparent;
+            font-size: 20px;
+            box-shadow: 1px 1px 5px white;
+            padding: 0 5px;
+            color: rgb(255, 255, 255);
+        }
+        
+        option {
+            color: black;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="trans">
+
+
+        <h1 id="text">
+
+            House price pridiction</h1>
+    </div>
+    <div class="back">
+        <div class="card">
+            <form method="post">
+
+                <input class=" input_container " name="name " placeholder="Enter your name ">
+
+                <select id="city_select " name="city" class="input_container " onchange="demo() " style="width: 41%; margin-left: 3vw; ">
+                  <option>Select city</option>
+                  {% for city in cities %}
+                  <option value="{{city}} ">{{city}}</option>
+                  {% endfor %}
+                  <!-- <option value="india ">INDIA</option>
+                  <option value="us ">US</option> -->
+                </select>
+
+                <select id="area_select" name="location" class="input_container " style="width: 41%; margin-left: 4vw; ">
+                    <option>Select specific area</option> 
+                    
+
+                    </select>
+
+                <table class="input_container">
+                    <tr>
+                        <td>
+                            Select BHK :
+                        </td>
+                        <td>
+                            <input type="radio" value="1 " name="bhk">
+                            <label>1</label> </td>
+                        <td>
+                            <input type="radio" value="2 " name="bhk"><label>2</label> </td>
+                        <td>
+                            <input type="radio" value="3 " name="bhk"><label>3</label>
+                        </td>
+                        <td>
+                            <input type="radio" value="4 " name="bhk"><label>4</label>
+                        </td>
+                        <td>
+                            <input type="radio" value="5 " name="bhk"><label>5</label>
+                        </td>
+                    </tr>
+                </table>
+                <button onclick="send_data()" style="width: 20%; border-radius: 20px;margin-left: 40%; " class="input_container ">Submit</button>
+            </form>
+            <h4 id="predict" style="color: white; text-align: center; font-size: 20px;">
+            </h4>
+        </div>
+
+    </div>
+    <script>
+        var s1 = document.getElementById("city_select");
+        var s2 = document.getElementById("area_select");
+
+
+
+        Banglore_location = ['Amruthahalli',
+            'Anekal City',
+            'Anjanapura',
+            'Attibele',
+            'Avalahalli Off Sarjapur Road',
+            'BTM Layout',
+            'Banashankari',
+            'Banaswadi',
+            'Bannerughatta',
+            'Begur',
+            'Bellandur',
+            'Bilekahalli',
+            'Bommanahalli',
+            'Bommasandra',
+            'Brookefield',
+            'Budigere Cross',
+            'CV Raman Nagar',
+            'Carmelaram',
+            'Chandapura',
+            'Chikkalasandra',
+            'Devanahalli',
+            'Doddanekundi',
+            'Domlur',
+            'Electronic City Phase 1',
+            'Electronic City Phase 2',
+            'Electronics City',
+            'Gottigere',
+            'Harlur',
+            'Hebbal',
+            'Hennur',
+            'Horamavu',
+            'Hosa Road',
+            'Hulimavu',
+            'ITPL',
+            'J. P. Nagar',
+            'JP Nagar Phase 1',
+            'JP Nagar Phase 3',
+            'JP Nagar Phase 4',
+            'JP Nagar Phase 6',
+            'JP Nagar Phase 7',
+            'JP Nagar Phase 8',
+            'JP Nagar Phase 9',
+            'Jakkur',
+            'Jalahalli',
+            'Jayanagar',
+            'Jigani',
+            'Junnasandra',
+            'K. Chudahalli',
+            'Kadugodi',
+            'Kadugodi Industrial Area',
+            'Kanakapura',
+            'Kannamangala',
+            'Kasavanahalli',
+            'Kengeri',
+            'Kodigehalli',
+            'Kogilu',
+            'Konanakunte',
+            'Koramangala',
+            'Kothanur',
+            'Krishnarajapura',
+            'Kudlu',
+            'Kumaraswamy Layout',
+            'Marathahalli',
+            'Marsur',
+            'Muneshwara Nagar',
+            'Nagarbhavi',
+            'Narayanaghatta',
+            'Nayandahalli',
+            'Nelamangala',
+            'Padmanabhanagar',
+            'R T  Nagar',
+            'R.K. Hegde Nagar',
+            'RMV',
+            'RMV Extension Stage 2',
+            'RR Nagar',
+            'Rajajinagar',
+            'Ramamurthy Nagar',
+            'Richmond Town',
+            'Sahakar Nagar',
+            'Sanjaynagar',
+            'Sarjapur',
+            'Singasandra',
+            'Subramanyapura',
+            'Thanisandra',
+            'Uttarahalli',
+            'Varthur',
+            'Vidyaranyapura',
+            'Whitefield',
+            'Whitefield Hope Farm Junction',
+            'Yelahanka'
+        ];
+        Mumbai_location = ['Kharghar',
+            'Sector-13 Kharghar',
+            'Sector 18 Kharghar',
+            'Sector 20 Kharghar',
+            'Sector 15 Kharghar',
+            'Dombivali',
+            'Churchgate',
+            'Prabhadevi',
+            'Jogeshwari West',
+            'Kalyan East',
+            'Malad East',
+            'Virar East',
+            'Virar',
+            'Malad West',
+            'Borivali East',
+            'Mira Road East',
+            'Goregaon West',
+            'Kandivali West',
+            'Borivali West',
+            'Kandivali East',
+            'Andheri East',
+            'Goregaon East',
+            'Wadala',
+            'Ulwe',
+            'Dahisar',
+            'kandivali',
+            'Goregaon',
+            'Bhandup West',
+            'thakur village kandivali east',
+            'Santacruz West',
+            'Kanjurmarg',
+            'I C Colony',
+            'Dahisar W',
+            'Marol',
+            'Parel',
+            'Lower Parel',
+            'Worli',
+            'Jogeshwari East',
+            'Chembur Shell Colony',
+            'Central Avenue',
+            'Chembur East',
+            'Diamond Market Road',
+            'Mulund',
+            'Nalasopara West',
+            'raheja vihar',
+            'Powai Lake',
+            'Taloja',
+            'Thane West',
+            'Vangani',
+            'Sector 5 Ulwe',
+            'Sector 17 Ulwe',
+            'Sector 19 Kharghar',
+            'Sector 21 Kamothe',
+            'Rutu Enclave',
+            'taloja panchanand',
+            'Virar West',
+            'Chembur',
+            'Sector 20 Kamothe',
+            'Sector-5 Kamothe',
+            'Sector 11 Kamothe',
+            'Sector-12 Kamothe',
+            'azad nagar',
+            'Sindhi Society Chembur',
+            'Kurla',
+            'Sahkar Nagar',
+            'Deonar',
+            'Thane',
+            'Jankalyan Nagar',
+            'Badlapur',
+            'Ambarnath',
+            'Ambernath West',
+            'Vakola',
+            'Kamothe',
+            'Kamothe Sector 16',
+            'Almeida Park',
+            'Khar',
+            'Bandra West',
+            'Pali Hill',
+            '15th Road',
+            'Palghar',
+            'Sector 21 Kharghar',
+            'Sector 12 Kharghar',
+            'Vivek Vidyalaya Marg',
+            'Vasai east',
+            'Nahur',
+            'Badlapur West',
+            'Panvel',
+            'Kalyan',
+            'Badlapur East',
+            'Mira Bhayandar',
+            'Juhu',
+            'Naigaon East',
+            'Sector 21 Ulwe',
+            'Bandra East',
+            'Dronagiri',
+            'Nerul',
+            'Sanpada',
+            'Sector-8 Ulwe',
+            'Sector-3 Ulwe',
+            'Sector 23 Ulwe',
+            'ULWE SECTOR 19',
+            'Ghodbunder Road',
+            'Bhiwandi',
+            'Vasai',
+            'Dadar East',
+            'Ghatkopar',
+            'Breach Candy',
+            'Worli South Mumbai',
+            'Asangaon',
+            'Koparkhairane Station Road',
+            'Kopar Khairane Sector 19A',
+            'Eastern Express Highway Vikhroli',
+            'Magathane',
+            'Ambernath East',
+            'Dattapada',
+            'Rajendra Nagar',
+            'Kulupwadi',
+            'Samata Nagar Thakur Village',
+            'Mira Road and Beyond',
+            'West Amardeep Colony',
+            'Pant Nagar',
+            'mumbai',
+            'Four Bungalows',
+            'no 9',
+            'kolshet',
+            'Hiranandani Meadows',
+            'Kalpataru',
+            'Petali',
+            'Kharghar Sector 34C',
+            'Ghatkopar East',
+            'Mumbai Agra National Highway',
+            'vasant vihar thane west',
+            'Kalyan West',
+            'Shirgaon',
+            'Pokhran 2',
+            'juhu tara',
+            'Peddar Road',
+            'Palm Beach',
+            'Sector 10',
+            'Sector 19 Kamothe',
+            'Tilak Nagar',
+            'Ghatkopar West',
+            'Tardeo',
+            'Mahalaxmi',
+            'Dahisar West',
+            'Mulund West',
+            'Link Road',
+            'Haridas Nagar',
+            'Shimpoli',
+            'TPS Road',
+            'Off Shimpoli road',
+            'Sunil Nagar',
+            'Sector 30 Kharghar',
+            'Sector 12 A',
+            'Sector 18',
+            'Sector 15',
+            'Sector 35G',
+            'Sector 5',
+            'Sector 35I Kharghar',
+            'Sector 30',
+            'Sector 36 Kharghar',
+            'Sector 11 Belapur',
+            'Sector-34B Kharghar',
+            'Dombivali East',
+            'Roadpali',
+            'Sector-50 Seawoods',
+            'Mumbai Highway',
+            'Sector 7 Kharghar',
+            'Lokhandwala Township',
+            'Andheri',
+            'Andheri West',
+            'Shastri Nagar',
+            'Wadala East Wadala',
+            'Kalwa',
+            'PARSIK NAGAR',
+            'Maharashtra Nagar',
+            'Patlipada',
+            'Belapur',
+            'Seawoods',
+            'Majiwada',
+            '4 Bunglows',
+            'Airoli',
+            'Kolshet Road',
+            'Sector 10 Khanda Colony',
+            'Pokharan Road',
+            'Kharegaon',
+            'Dombivli (West)',
+            'DN Nagar Road',
+            'Godrej Hill',
+            'Ganesh Nagar',
+            'Haware City',
+            'Mahatma Gandhi Road',
+            'Vasai West',
+            'Mumbai Nashik Expressway',
+            'Katrap',
+            'Mira Road',
+            'Western Express Highway Kandivali East',
+            'Vasind',
+            'Thakurli',
+            'Shakti Nagar',
+            'Bhayandar East',
+            'Dahisar East',
+            'ulhasnagar 4',
+            'Sector-26 Taloja',
+            'Koproli'
+        ];
+        Kolkata_location = ['Barasat',
+            'Keshtopur',
+            'Rajarhat',
+            'Narendrapur',
+            'New Town',
+            'Joka',
+            'Tangra',
+            'Sonarpur',
+            'Madhyamgram',
+            'Dum Dum',
+            'Tollygunge',
+            'Ultadanga',
+            'New Alipore',
+            'Mukundapur',
+            'Behala',
+            'Sodepur',
+            'Konnagar',
+            'Uttarpara Kotrung',
+            'Baguiati',
+            'Hooghly Chinsurah',
+            'Hussainpur',
+            'Dum Dum Park',
+            'Bhadreswar',
+            'Garia',
+            'south dum dum',
+            'Santoshpur',
+            'Gariahat',
+            'Lake Gardens'
+        ];
+        Delhi_location = ['Sector 10 Dwarka',
+            'Uttam Nagar',
+            'Sarita Vihar',
+            'Dwarka Mor',
+            'Sector 7 Dwarka',
+            'Sector 6 Dwarka',
+            'Sector 5 Dwarka',
+            'Sector 23 Rohini',
+            'Mayur Vihar II',
+            'Sector 24 Rohini',
+            'Sector 11 Dwarka',
+            'Sector 23 Dwarka',
+            'Sector 12 Dwarka',
+            'West End',
+            'Sector 9 Rohini',
+            'Mundka',
+            'Sector 13 Rohini',
+            'Jamia Nagar',
+            'Sector 19 Dwarka',
+            'Sector 17 Dwarka',
+            'Bindapur',
+            'Sector-18 Dwarka',
+            'Vasant Kunj',
+            'Shastri Nagar',
+            'Sector-8 Rohini',
+            'Sector 9 Dwarka',
+            'Govindpuri',
+            'Sector 22 Dwarka',
+            'Matiala',
+            'Saket',
+            'Mahavir Enclave',
+            'Burari',
+            'Shahdara',
+            'Babarpur',
+            'Khanpur',
+            'Sector 13 Dwarka',
+            'Mansa Ram Park',
+            'Green Park',
+            'Kalkaji',
+            'Sector 4 Dwarka',
+            'DLF Phase 5',
+            'Sector 3 Dwarka',
+            'Chittaranjan Park',
+            'Chattarpur',
+            'Greater Kailash',
+            'Sector-14 Rohini',
+            'Paschim Vihar',
+            'Pitampura',
+            'Sector 18B Dwarka',
+            'Sector 2 Dwarka',
+            'Jasola',
+            'Palam',
+            'Saidabad',
+            'Budh Vihar',
+            'Sector 25 Rohini',
+            'Sector 18A Dwarka',
+            'Sewak Park',
+            'Sector 23B Dwarka',
+            'Rohini sector 24',
+            'Sector 28 Rohini',
+            'Rohini Sector 9',
+            'Rohini Extension',
+            'nawada',
+            'Alaknanda',
+            'Sector 22 Rohini',
+            'Lajpat Nagar',
+            'South Extension 2',
+            'Sector 16B Dwarka',
+            'Sheikh Sarai',
+            'Sidhartha Nagar',
+            'Sector-D Vasant Kunj',
+            'Hauz Khas',
+            'Kalkaji Extension',
+            'Greater kailash 1',
+            'Lajpat Nagar III',
+            'Safdarjung Enclave',
+            'Greater Kailash II',
+            'Sector 20 Rohini',
+            'greater kailash Enclave 1',
+            'DLF Farms',
+            'Mehrauli',
+            'Mahipalpur',
+            'mayur vihar phase 1',
+            'Sarvodaya Enclave',
+            'Karol Bagh',
+            'West Sagarpur',
+            'Ashok Vihar',
+            'Sector 21 Dwarka',
+            'East of Kailash',
+            'Dashrath Puri',
+            'SULTANPUR',
+            'Patparganj',
+            'Kaushambi',
+            'Shakurbasti',
+            'Hari Nagar',
+            'Siri Fort',
+            'Katwaria Sarai',
+            'Mayur Vihar',
+            'Nasirpur'
+        ];
+        Chennai_location = ['Perungalathur',
+            'Madhavaram',
+            'Karapakkam',
+            'Mevalurkuppam',
+            'Kolapakkam',
+            'Kundrathur',
+            'Pammal',
+            'Puzhal',
+            'Selaiyur',
+            'Thoraipakkam OMR',
+            'Anna Nagar',
+            'Mogappair',
+            'Sholinganallur',
+            'Medavakkam',
+            'Avadi',
+            'Tiruvottiyur',
+            'Manapakkam',
+            'Madipakkam',
+            'Thiruvanmiyur',
+            'Ramapuram',
+            'Saidapet',
+            'Poonamallee',
+            'Pallavaram',
+            'Maraimalai Nagar',
+            'Madambakkam',
+            'Perungudi',
+            'Villivakkam',
+            'Adyar',
+            'Navallur',
+            'Chromepet',
+            'Nandambakkam',
+            'Kelambakkam',
+            'Vadapalani',
+            'Kumananchavadi',
+            'Porur',
+            'Periyapanicheri',
+            'Manikandan Nagar',
+            'Kodambakkam',
+            'Velachery',
+            'East Tambaram',
+            'Gopalapuram',
+            'Sunnambu Kolathur S Kolathur',
+            'Perumbakkam',
+            'Urapakkam',
+            'Raja Annamalai Puram',
+            'Besant Nagar',
+            'Nanmangalam',
+            'Jamalia',
+            'Guduvancheri',
+            'Sembakkam',
+            'Adambakkam',
+            'Nungambakkam',
+            'T Nagar',
+            'K K Nagar',
+            'Ambattur',
+            'Valasaravakkam',
+            'Mugalivakkam',
+            'Maduravoyal',
+            'Mudichur',
+            'West Tambaram',
+            'Alwarpet',
+            'Annanagar West',
+            'Thiruverkadu',
+            'tambaram west',
+            'Guindy',
+            'Korattur',
+            'Irumbuliyur',
+            'Kolathur',
+            'Thirumullaivoyal',
+            'Singaperumal Koil',
+            'Ayapakkam',
+            'Perambur',
+            'Chetpet',
+            'Kilpauk',
+            'Egmore',
+            'Alandur',
+            'Kovur',
+            'Vandalur',
+            'Pozhichalur',
+            'Vanagaram',
+            'Thoraipakkam',
+            'Ullagaram',
+            'Kovilambakkam',
+            'Kattupakkam',
+            'Thirumazhisai',
+            'Ayanambakkam',
+            'Sithalapakkam',
+            'Vengaivasal',
+            'Annanagar',
+            'Chengalpattu',
+            'Pallikaranai',
+            'Rajakilpakkam',
+            'Chitlapakkam',
+            'Palavakkam',
+            'Kotturpuram',
+            'Ramavaram',
+            'Padi',
+            'NehruNagar',
+            'Padur',
+            'Mambakkam',
+            'Egatoor',
+            'Virugambakkam',
+            'Moolakadai',
+            'Siruseri',
+            'Royapettah',
+            'Nandanam',
+            'Vellakkal',
+            'Annamalai Colony',
+            'Thalambur',
+            'Nanganallur',
+            'Chembarambakkam',
+            'Teynampet',
+            'Injambakkam',
+            'Aminjikarai',
+            'CIT Nagar',
+            'Koyambedu',
+            'Choolaimedu'
+        ];
+        Hyderabad_location = ['Nizampet',
+            'Hitech City',
+            'Manikonda',
+            'Alwal',
+            'Kukatpally',
+            'Gachibowli',
+            'Tellapur',
+            'Kokapet',
+            'Hyder Nagar',
+            'Mehdipatnam',
+            'Narsingi',
+            'Madhapur',
+            'Puppalaguda',
+            'Begumpet',
+            'Banjara Hills',
+            'AS Rao Nagar',
+            'Pragathi Nagar Kukatpally',
+            'Miyapur',
+            'Mallampet',
+            'Nanakramguda',
+            'Attapur',
+            'West Marredpally',
+            'Kompally',
+            'Sri Nagar Colony',
+            'Hakimpet',
+            'Pocharam',
+            'Nagole',
+            'LB Nagar',
+            'Meerpet',
+            'Kachiguda',
+            'Masab Tank',
+            'Kondapur',
+            'Saroornagar',
+            'Uppal Kalan',
+            'Mallapur',
+            'Rajendra Nagar',
+            'Beeramguda',
+            'Moosapet',
+            'Bachupally',
+            'Lakdikapul',
+            'Tarnaka',
+            'Kistareddypet',
+            'Hafeezpet',
+            'Shaikpet',
+            'Amberpet',
+            'Kapra',
+            'Habsiguda',
+            'Sanath Nagar',
+            'Kothaguda',
+            'Balanagar',
+            'Jubilee Hills',
+            'Murad Nagar',
+            'Chandanagar',
+            'East Marredpally',
+            'Aminpur',
+            'Gajularamaram',
+            'Serilingampally',
+            'Malkajgiri',
+            'Mettuguda',
+            'Venkat Nagar Colony',
+            'Kondakal',
+            'Gopanpally',
+            'Somajiguda',
+            'Nallagandla Gachibowli',
+            'Bolarum',
+            'Zamistanpur',
+            'Madhura Nagar',
+            'Ghansi Bazaar',
+            'Chintalakunta',
+            'Nallakunta',
+            'Bowenpally',
+            'Bandlaguda Jagir',
+            'Boduppal',
+            'Neknampur',
+            'Ambedkar Nagar',
+            'Vanasthalipuram',
+            'Moula Ali',
+            'Gandipet',
+            'Nacharam',
+            'Appa Junction',
+            'Qutub Shahi Tombs',
+            'Abids',
+            'Dilsukh Nagar',
+            'Quthbullapur',
+            'Sainikpuri',
+            'KTR Colony',
+            'Bollaram',
+            'Karmanghat',
+            'Uppal',
+            'Cherlapalli',
+            'Himayat Nagar',
+            'Rhoda Mistri Nagar',
+            'Hitex Road',
+            'ECIL',
+            'Boiguda',
+            'ECIL Main Road',
+            'ECIL Cross Road',
+            'Ramachandra Puram',
+            'Mansoorabad',
+            'Pragati Nagar',
+            'Padmarao Nagar',
+            'BK Guda Internal Road',
+            'muthangi',
+            'Pragathi Nagar',
+            'Yapral',
+            'Narayanguda',
+            'Kollur',
+            'Bachupally Road',
+            'Old Bowenpally',
+            'Arvind Nagar Colony',
+            'Matrusri Nagar',
+            'Pragathi Nagar Road',
+            'Padma Colony',
+            'Happy Homes Colony',
+            'Old Nallakunta',
+            'Sangeet Nagar',
+            'Methodist Colony',
+            'Ameerpet',
+            'Medchal',
+            'Dammaiguda',
+            'Suchitra',
+            'Whitefields',
+            'Mayuri Nagar',
+            'Adda Gutta',
+            'Miyapur HMT Swarnapuri Colony',
+            'Central Excise Colony Hyderabad',
+            'Basheer Bagh',
+            'Gopal Nagar',
+            'Kushaiguda',
+            'Ashok Nagar',
+            'Barkatpura',
+            'Madinaguda',
+            'Bagh Amberpet',
+            'new nallakunta',
+            'BHEL',
+            'Sun City',
+            'Hydershakote',
+            'BK Guda Road',
+            'Nallagandla Road',
+            'IDPL Colony',
+            'Ramnagar Gundu',
+            'Alkapur township',
+            'Banjara Hills Road Number 12',
+            'Panchavati Colony Manikonda',
+            'New Maruthi Nagar',
+            'Miyapur Bachupally Road',
+            'nizampet road',
+            'HMT Hills',
+            'Tilak Nagar',
+            'Isnapur',
+            'D D Colony',
+            'DD Colony',
+            'Patancheru',
+            'Almasguda',
+            'Allwyn Colony',
+            'financial District',
+            'Beeramguda Road',
+            'Pati',
+            'Karimnagar',
+            'Kollur Road',
+            'Chaitanyapuri',
+            'Nandagiri Hills',
+            'Whitefield',
+            'Film Nagar',
+            'Kismatpur',
+            'Dr A S Rao Nagar Rd',
+            'KPHB',
+            'Vivekananda Nagar Colony',
+            'Ameenpur',
+            'Ring Road',
+            'Saket',
+            'Kavuri Hills',
+            'manneguda',
+            'Moti Nagar',
+            'Usman Nagar',
+            'Shadnagar',
+            'Mailardevpally',
+            'Tirumalgiri',
+            'Chikkadapally',
+            'JNTU',
+            'hyderabad',
+            'Shamshabad',
+            'Srisailam Highway',
+            'Domalguda',
+            'Lingampalli',
+            'Whisper Valley',
+            'Santoshnagar',
+            'Tolichowki',
+            'Domalguda Road',
+            'Shankarpalli',
+            'Kothapet',
+            'Baghlingampally',
+            'Picket',
+            'Safilguda',
+            'Sikh Village',
+            'Neredmet',
+            'Macha Bolarum',
+            'Kowkur',
+            'Rakshapuram',
+            'west venkatapuram',
+            'Vidyanagar Adikmet',
+            'Aushapur',
+            'Old Alwal',
+            'Secunderabad Railway Station Road',
+            'Balapur',
+            'Hastinapur',
+            'chandrayangutta'
+        ];
+
+        function demo() {
+
+            var s4 = document.getElementById("city_select ");
+            var s3 = s4.options[s4.selectedIndex];
+
+            s2.innerHTML = " ";
+            console.log(s3.value);
+
+            if (s3.value === "Banglore ") {
+                s2.remove(0);
+                console.log("1 ");
+                Banglore_location.forEach(option => {
+                    const newOption = document.createElement('option');
+                    newOption.value = option;
+                    newOption.text = option;
+                    s2.add(newOption);
+                });
+            } else if (s3.value === "Mumbai ") {
+                s2.remove(0);
+                console.log("2 ");
+                Mumbai_location.forEach(option => {
+                    const newOption = document.createElement('option');
+                    newOption.value = option;
+                    newOption.text = option;
+                    s2.add(newOption);
+                });
+            } else if (s3.value === "Kolkata ") {
+                s2.remove(0);
+                console.log("3 ");
+                Kolkata_location.forEach(option => {
+                    const newOption = document.createElement('option');
+                    newOption.value = option;
+                    newOption.text = option;
+                    s2.add(newOption);
+                });
+            } else if (s3.value === "Hyderabad ") {
+                s2.remove(0);
+                console.log("4 ");
+                Hyderabad_location.forEach(option => {
+                    const newOption = document.createElement('option');
+                    newOption.value = option;
+                    newOption.text = option;
+                    s2.add(newOption);
+                });
+            } else if (s3.value === "Chennai ") {
+                s2.remove(0);
+                console.log("5 ");
+                Chennai_location.forEach(option => {
+                    const newOption = document.createElement('option');
+                    newOption.value = option;
+                    newOption.text = option;
+                    s2.add(newOption);
+                });
+            } else if (s3.value === "Delhi ") {
+                s2.remove(0);
+                console.log("6 ");
+                Delhi_location.forEach(option => {
+                    const newOption = document.createElement('option');
+                    newOption.value = option;
+                    newOption.text = option;
+                    s2.add(newOption);
+                });
+            }
+
+
+        }
+
+
+        function send_data() {
+            console.log("button entered");
+
+            document.querySelector("form").addEventListener("submit", form_handler);
+            var fd = new FormData(document.querySelector("form"));
+            var xm = new XMLHttpRequest();
+            xm.open('post', '/prediction', true);
+            document.getElementById("predict").innerHTML = "Wait......";
+            xm.onreadystatechange = function() {
+                if (xm.readyState == XMLHttpRequest.DONE) {
+                    document.getElementById("predict").innerHTML = "wel-come , " + " acording to your applied conditions, you have to pay minimum RS." + xm.responseText + ", thank you ...!";
+                }
+            };
+            xm.onload = function() {}
+            xm.send(fd);
+        }
+
+        function form_handler() {
+            event.preventDefault();
+        }
+    </script>
+
+</body>
+
+</html>
+
+</html>
